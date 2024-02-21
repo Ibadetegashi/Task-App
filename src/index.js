@@ -1,10 +1,9 @@
 const express = require('express')
 const app = express()
-
+const dotenv = require('dotenv')
+dotenv.config()
 require('./database/index')
 const { userRouters, taskRouters } = require('./routers')
-
-
 
 app.use(express.json())
 

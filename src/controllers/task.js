@@ -22,11 +22,31 @@ const createTask = async (req, res) => {
     }
 };
 
+//GET /tasks?completed=true
+//GET /tasks?limit=3&&skip=2
+//GET /tasks?sortBy=createdAt:asc
 const getTasks = async (req, res) => {
     try {
-        const user = await User
-            .findById(req.user._id)
-            .populate('tasks')
+        const match = {}
+        const sort = {}
+
+        if (req.query.completed) {
+            match.completed = req.query.completed === 'true'
+        }
+        if (req.query.sortBy) {
+            const parts = req.query.sortBy.split(':')
+            sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+            console.log(sort); //{createdAt:1}
+        }
+        const user = await req.user.populate({
+            path: 'tasks', //with which field will be populated 
+            match, //condition for populate
+            options: {
+                limit: +req.query.limit,
+                skip: +req.query.skip,
+                sort
+            }
+        })
 
         res.send(user.tasks)
     } catch (error) {

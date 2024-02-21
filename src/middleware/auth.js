@@ -6,12 +6,16 @@ const auth = async (req, res, next) => {
     try {
 
         const token = req.headers.authorization.split(' ')[1];
-        const decode = jwt.verify(token, 'mysecretKey1')
-        const user = await User.findOne({ _id: decode._id, "tokens.token": token })
+        const decode = jwt.verify(token, process.env.SECRET_KEY)
+        const user = await User.findOne({
+            _id: decode._id,
+            "tokens.token": token
+        })
 
         if (!user) {
             throw new Error()
         }
+
         req.user = user;
         req.token = token;
         console.log(req.user);
@@ -23,7 +27,7 @@ const auth = async (req, res, next) => {
         if (error instanceof jwt.TokenExpiredError) {
             return res.status(401)
                 .send({ error: 'Token expired' });
-            
+
         } else if (error instanceof jwt.JsonWebTokenError) {
             return res.status(401)
                 .send({ error: 'Invalid token' });
